@@ -29,34 +29,32 @@ MonoBehaviour:
     referenceMode: 2
     serializationDepthLimit: 64
     assemblyNames:
-    - Assembly-CSharp
-    - UniTask
-    - UIWidgets
     - Assembly-CSharp-firstpass
-    - UniTask.Linq
-    - UniRx
-    - MTE_script
-    - Cinemachine
-    - Animancer.Examples
-    - LeanPool
+    - Assembly-CSharp
+    - UIWidgets
     - Animancer
-    - UniTask.DOTween
-    - Animancer.FSM
-    - LeanCommon
-    - XNode
-    - SimpleFileBrowser.Runtime
-    - UniRx.Examples
-    - Purchasing.Common
-    - Auxiliary
     - NavMeshComponents
-    - UniTask.Addressables
-    - Sirenix.OdinInspector.CompatibilityLayer
-    - UniTask.TextMeshPro
+    - Animancer.Examples
+    - UniRx
+    - UniTask
+    - Cinemachine
+    - Animancer.FSM
+    - UniTask.Linq
+    - SimpleFileBrowser.Runtime
+    - LeanPool
+    - MTE_script
+    - UniRx.Examples
     - XNodeEditor
-    - Sirenix.OdinInspector.CompatibilityLayer.Editor
-    - UniTask.Editor
-    - Analytics
+    - LeanCommon
+    - UniTask.Addressables
+    - XNode
     - NavMeshComponentsEditor
+    - Purchasing.Common
+    - UniTask.TextMeshPro
+    - UniTask.DOTween
+    - Auxiliary
+    - Analytics
+    - UniTask.Editor
     showAdvancedSettings: 0
   addMgrToSceneAutomatically: 0
   autoUpdateReferences: 1
