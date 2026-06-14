@@ -1595,7 +1595,7 @@ namespace XLua
         public int callbackOrder { get { return 0; } }
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            var dir = Path.GetDirectoryName(report.files.Single(file => file.path.EndsWith("Assembly-CSharp.dll")).path);
+            var dir = Path.GetDirectoryName(report.GetFiles().Single(file => file.path.EndsWith("Assembly-CSharp.dll")).path);
             Hotfix.HotfixInject(dir);
         }
     }
@@ -1637,7 +1637,7 @@ namespace XLua
                 return;
             }
 
-#if UNITY_EDITOR_OSX
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
 			var mono_path = Path.Combine(Path.GetDirectoryName(typeof(UnityEngine.Debug).Module.FullyQualifiedName),
 				"../MonoBleedingEdge/bin/mono");
 			if(!File.Exists(mono_path))

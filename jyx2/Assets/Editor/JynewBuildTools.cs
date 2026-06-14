@@ -241,13 +241,17 @@ namespace Editor
         [MenuItem("一键打包/Linux")]
         private static void BuildLinux()
         {
-            new JynewBuilder().Build(BuildTarget.StandaloneLinux64, "LinuxBuild", "");
+            string currentDate = DateTime.Now.ToString("yyyyMMdd");
+            string outputName = $"jynew-Linux-{currentDate}";
+            new JynewBuilder().Build(BuildTarget.StandaloneLinux64, "LinuxBuild", outputName);
         }
         
         [MenuItem("一键打包/Linux Dev", false, 2000)]
         private static void BuildLinuxDev()
         {
-            new JynewBuilder().Build(BuildTarget.StandaloneLinux64, "LinuxBuild", "", BuildOptions.Development);
+            string currentDate = DateTime.Now.ToString("yyyyMMdd");
+            string outputName = $"jynew-Linux-{currentDate}";
+            new JynewBuilder().Build(BuildTarget.StandaloneLinux64, "LinuxBuild", outputName, BuildOptions.Development);
         }
     }
 }

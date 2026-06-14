@@ -14,6 +14,10 @@ namespace BeautifyEffect
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.J)) {
+
+                Beautify.instance.bloomIntensity += 0.1f;
+            }
             if (Input.GetKeyDown(KeyCode.T) || Input.GetMouseButtonDown(0))
             {
                 Beautify.instance.enabled = !Beautify.instance.enabled;

@@ -1,4 +1,4 @@
-﻿	// Copyright 2016-2018 Kronnect - All Rights Reserved.
+﻿	// Copyright 2016-2019 Kronnect - All Rights Reserved.
 	
 	#include "UnityCG.cginc"
 
@@ -67,6 +67,11 @@
 	}
 		
 	void beautifyPassFast(v2f i, inout fixed3 rgbM) {
+
+		#if defined(BEAUTIFY_KILL_NAN)
+			rgbM = clamp(rgbM, 0, 8);
+		#endif
+
    	    fixed3 rgbN       = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uvN).rgb;
 		fixed3 rgbS       = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uvS).rgb;
 	    fixed3 rgbW       = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uvW).rgb;
@@ -91,6 +96,7 @@
 
 	fixed4 fragBeautifyFast (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
    		fixed4 pixel = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
    		beautifyPassFast(i, pixel.rgb);
    		return pixel;
@@ -98,18 +104,32 @@
 	
 	fixed4 fragCompareFast (v2fCompare i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
 		// separator line + antialias
-		float2 dd     = i.uvNonStereo - 0.5.xx;
+        float2 dd     = i.uv;
+        if (_CompareParams.z < -15) {
+            dd.x -= (_CompareParams.z - -20);
+            _CompareParams.z = -10;
+        } else {
+            dd.x -= 0.5;
+        }
+        dd.y -= 0.5;
+
 		float  co     = dot(_CompareParams.xy, dd);
 		float  dist   = distance( _CompareParams.xy * co, dd );
 		float4 aa     = saturate( (_CompareParams.w - dist) / abs(_MainTex_TexelSize.y) );
 
-		fixed4 pixel  = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
-		fixed4 pixelNice = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CompareTex, i.uv);
+        float  sameSide = (_CompareParams.z > -5);
+        float2 pixelUV = lerp(i.uv, float2(i.uv.x + _CompareParams.z, i.uv.y), sameSide);
+        float2 pixelNiceUV = lerp(i.uv, float2(i.uv.x - 0.5 + _CompareParams.z, i.uv.y), sameSide);
+
+		float4 pixel  = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, pixelUV);
+		float4 pixelNice = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CompareTex, pixelNiceUV);
 		
-		// are we on the beautified side?
-		fixed t       = dot(dd, _CompareParams.yz) > 0;
+		// are we on the beautified side
+        float2 cp     = float2(_CompareParams.y, -_CompareParams.x);
+		fixed t       = dot(dd, cp) > 0;
 		pixel         = lerp(pixel, pixelNice, t);
 		return pixel + aa;
 

@@ -1,4 +1,4 @@
-Shader "Beautify/CopyDepth" {
+Shader "Hidden/Kronnect/Beautify/CopyDepth" {
 	Properties{
 		_MainTex("", 2D) = "white" {}
 	}

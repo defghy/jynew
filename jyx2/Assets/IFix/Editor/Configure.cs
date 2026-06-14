@@ -49,11 +49,19 @@ namespace IFix
         //
         public static Dictionary<string, List<KeyValuePair<object, int>>> GetConfigureByTags(List<string> tags)
         {
-            var types = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                        where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder) {
+                    continue;
+                }
+                try {
+                    types.AddRange(
                         from type in assembly.GetTypes()
                         where type.IsDefined(typeof(ConfigureAttribute), false)
-                        select type;
+                        select type
+                    );
+                } catch (ReflectionTypeLoadException) { }
+            }
             var tagsMap = tags.ToDictionary(t => t, t => new List<KeyValuePair<object, int>>());
 
             foreach(var type in types)
@@ -88,11 +96,19 @@ namespace IFix
 
         public static List<MethodInfo> GetFilters()
         {
-            var types = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                        where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder) {
+                    continue;
+                }
+                try {
+                    types.AddRange(
                         from type in assembly.GetTypes()
                         where type.IsDefined(typeof(ConfigureAttribute), false)
-                        select type;
+                        select type
+                    );
+                } catch (ReflectionTypeLoadException) { }
+            }
 
             List<MethodInfo> filters = new List<MethodInfo>();
             foreach (var type in types)
@@ -111,11 +127,21 @@ namespace IFix
 
         public static IEnumerable<MethodInfo> GetTagMethods(Type tagType, string searchAssembly)
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
-                        && (assembly.GetName().Name == searchAssembly)
-                    where assembly.CodeBase.IndexOf("ScriptAssemblies") != -1
-                    from type in assembly.GetTypes()
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (
+                    assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder
+                    || assembly.GetName().Name != searchAssembly
+                    || assembly.CodeBase.IndexOf("ScriptAssemblies") == -1
+                ) {
+                    continue;
+                }
+                try {
+                    types.AddRange(assembly.GetTypes());
+                } catch (ReflectionTypeLoadException) { }
+            }
+
+            return (from type in types
                     from method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public
                         | BindingFlags.NonPublic)
                     where method.IsDefined(tagType, false)
@@ -124,11 +150,21 @@ namespace IFix
 
         public static IEnumerable<FieldInfo> GetTagFields(Type tagType, string searchAssembly)
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
-                        && (assembly.GetName().Name == searchAssembly)
-                    where assembly.CodeBase.IndexOf("ScriptAssemblies") != -1
-                    from type in assembly.GetTypes()
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (
+                    assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder
+                    || assembly.GetName().Name != searchAssembly
+                    || assembly.CodeBase.IndexOf("ScriptAssemblies") == -1
+                ) {
+                    continue;
+                }
+                try {
+                    types.AddRange(assembly.GetTypes());
+                } catch (ReflectionTypeLoadException) { }
+            }
+
+            return (from type in types
                     from field in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public
                         | BindingFlags.NonPublic)
                     where field.IsDefined(tagType, false)
@@ -137,11 +173,21 @@ namespace IFix
 
         public static IEnumerable<PropertyInfo> GetTagProperties(Type tagType, string searchAssembly)
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
-                        && (assembly.GetName().Name == searchAssembly)
-                    where assembly.CodeBase.IndexOf("ScriptAssemblies") != -1
-                    from type in assembly.GetTypes()
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (
+                    assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder
+                    || assembly.GetName().Name != searchAssembly
+                    || assembly.CodeBase.IndexOf("ScriptAssemblies") == -1
+                ) {
+                    continue;
+                }
+                try {
+                    types.AddRange(assembly.GetTypes());
+                } catch (ReflectionTypeLoadException) { }
+            }
+
+            return (from type in types
                     from property in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public
                         | BindingFlags.NonPublic)
                     where property.IsDefined(tagType, false)
@@ -150,11 +196,21 @@ namespace IFix
 
         public static IEnumerable<Type> GetTagClasses(Type tagType, string searchAssembly)
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
-                        && (assembly.GetName().Name == searchAssembly)
-                    where assembly.CodeBase.IndexOf("ScriptAssemblies") != -1
-                    from type in assembly.GetTypes()
+            var types = new List<Type>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                if (
+                    assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder
+                    || assembly.GetName().Name != searchAssembly
+                    || assembly.CodeBase.IndexOf("ScriptAssemblies") == -1
+                ) {
+                    continue;
+                }
+                try {
+                    types.AddRange(assembly.GetTypes());
+                } catch (ReflectionTypeLoadException) { }
+            }
+
+            return (from type in types
                     where type.IsDefined(tagType, false)
                     select type
                     );

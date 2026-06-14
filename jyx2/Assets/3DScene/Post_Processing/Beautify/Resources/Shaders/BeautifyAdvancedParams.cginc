@@ -5,20 +5,29 @@
 // Uncomment this one to support Orthographic Camera
 //#define BEAUTIFY_ORTHO
 
-// Comment out this one to disable sharpen, brightness, contrast and vibrance effects
-#define BEAUTIFY_ENABLE_CORE_EFFECTS
+// Comment out this one to disable sharpen
+#define BEAUTIFY_ENABLE_CORE_EFFECT
+
+// Comment out this one to apply sharpen regardless of depth
+//#define BEAUTIFY_DEPTH_BASED_SHARPEN
+
+// Comment out this one to disable brightness, contrast and vibrance effects
+#define BEAUTIFY_ENABLE_COLOR_TWEAKS
 
 // Comment out this one to disable dithering. Can improve performance on old mobile devices.
-#define BEAUTIFY_ENABLE_DITHER
+//#define BEAUTIFY_ENABLE_DITHER
 
 // Dither is applied at the end of stack. Comment out this line to apply dither at the start.
-#define BEAUTIFY_DITHER_FINAL
+//#define BEAUTIFY_DITHER_FINAL
 
 // Comment out this line to simplify eye adaptation to brightness increase/reduction (old method)
-#define BEAUTIFY_EYE_ADAPTATION_DYNAMIC_RANGE
+//#define BEAUTIFY_EYE_ADAPTATION_DYNAMIC_RANGE
 
 // Uncomment this to enable occlusion on objects that do not have colliders
 //#define BEAUTIFY_SUN_FLARES_OCCLUSION_DEPTH
+
+// Uncomment this to enable occlusion on sky luminance
+//#define BEAUTIFY_SUN_FLARES_OCCLUSION_CHROMA
 
 // Uncomment this line to use an alternate ACES tonemap operator
 //#define BEAUTIFY_ACES_FITTED
@@ -31,3 +40,13 @@
 
 // Uncomment this line to improve LUT transform in Best Performance mode
 //#define BEAUTIFY_BETTER_FASTER_LUT
+
+// Uncomment this line to enable AntiAliasing
+//#define BEAUTIFY_EDGE_AA
+
+// Uncomment this line to enable Hard Light effect
+#define BEAUTIFY_HARD_LIGHT
+
+// Uncomment this line to ensure the pixels of the input image are valid
+//#define BEAUTIFY_KILL_NAN
+

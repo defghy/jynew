@@ -239,7 +239,31 @@ namespace Jyx2.ResourceManagement
             for (int i=_modList.Count-1;i>=0;--i)
             {
                 var modId = _modList[i];
-                yield return uri.ToLower().Replace("assets/",$"assets/mods/{modId}/");
+                var fixedUri = uri.ToLower().Replace("assets/",$"assets/mods/{modId}/");
+                #if UNITY_EDITOR_LINUX
+                var pathParts = fixedUri.Split(Path.DirectorySeparatorChar);
+                fixedUri = ".";
+                foreach (var pathPart in pathParts)
+                {
+                    try
+                    {
+                        fixedUri = Directory.GetFileSystemEntries(
+                            fixedUri,
+                            pathPart,
+                            new EnumerationOptions {MatchCasing = MatchCasing.CaseInsensitive}
+                        )[0];
+                    }
+                    catch (System.Exception)
+                    {
+                        fixedUri = Path.Combine(fixedUri, pathPart);
+                    }
+                    if (fixedUri.StartsWith("./"))
+                    {
+                        fixedUri = fixedUri[2..];
+                    }
+                }
+                #endif
+                yield return fixedUri;
             }
         }
 

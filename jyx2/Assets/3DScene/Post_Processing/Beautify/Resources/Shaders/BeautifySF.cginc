@@ -1,6 +1,7 @@
-﻿	#include "UnityCG.cginc"
+	#include "UnityCG.cginc"
 	#include "BeautifyAdvancedParams.cginc"
-		
+	#include "BeautifyOrtho.cginc"
+			
 	UNITY_DECLARE_SCREENSPACE_TEXTURE(_MainTex);
 
 	#if defined(BEAUTIFY_SUN_FLARES_OCCLUSION_DEPTH)
@@ -20,6 +21,8 @@
 	uniform float4    _SunGhosts4;  // x = reserved, y = size, 2 = pos offset, 3 = brightness
    	uniform float3    _SunHalo;  // x = offset, y = amplitude, z = intensity
    	uniform float3    _SunTint;
+	uniform float3	  _SunPosRightEye;
+    uniform sampler2D _SFMainTex;
 
     struct appdata {
     	float4 vertex : POSITION;
@@ -56,9 +59,9 @@
    	float3 sunflare(float2 uv) {
    	
 		// general params
-   		float2 sunPos = _SunPos.xy;
+   		float2 sunPos = unity_StereoEyeIndex == 0 ? _SunPos.xy : _SunPosRightEye.xy;
 
-   		#if defined(BEAUTIFY_SUN_FLARES_OCCLUSION_DEPTH)
+   		#if defined(BEAUTIFY_SUN_FLARES_OCCLUSION_DEPTH) && defined(BEAUTIFY_DEPTH_BASED_SHARPEN)
    			float4 depthSunPos = float4(sunPos, 0, 0);
     		#if UNITY_UV_STARTS_AT_TOP
     			if (_MainTex_TexelSize.y < 0) {
@@ -66,9 +69,15 @@
     	    	depthSunPos.y = 1.0 - depthSunPos.y;
     		}
     		#endif
-	   		float depth  = Linear01Depth(UNITY_SAMPLE_DEPTH(SAMPLE_RAW_DEPTH_TEXTURE_LOD(_CameraDepthTexture, depthSunPos)));
+	   		float depth  = Linear01Depth(BEAUTIFY_DEPTH_LOD(_CameraDepthTexture, depthSunPos));
    			if (depth<1) return 0;
     	#endif
+
+        #if defined(BEAUTIFY_SUN_FLARES_OCCLUSION_CHROMA)
+            half3 skyColor = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_SFMainTex, sunPos).rgb;
+            half mb = max(skyColor.g, skyColor.r);
+            if ( (skyColor.b / mb) < 1.0) return 0;
+        #endif
 
    		float2 grd = uv - sunPos;
 		float aspectRatio = _ScreenParams.y / _ScreenParams.x;
@@ -90,20 +99,6 @@
    		s0 += 1.0 / ray2;
    		
    		s0 *= _SunData.x;
-   		
-		// ghosts hexagonal
-//		float gang = atan2( (sunPos.y * _ScreenParams.y / _ScreenParams.x) - 0.5, sunPos.x - 0.5); // this angle should be passed by uniform
-//		grd = uv - ghost1Pos + (ghost1Pos - 0.5) * ghost1PosOffset;
-//		grd.y *= _ScreenParams.y / _ScreenParams.x;
-//		rotate(grd, gang);
-//		grd *= ghost1Size;
-//   		s0 +=  tex2D(_FlareTex, grd + 0.5.xx).r * ghost1Brighness;
-//
-//   		grd = uv - ghost2Pos + (ghost2Pos - 0.5) * ghost2PosOffset;
-//		grd.y *= _ScreenParams.y / _ScreenParams.x;
-//		rotate(grd, gang);
-//		grd *= ghost2Size;
-//   		s0 += tex2D(_FlareTex, grd + 0.5.xx).r * ghost2Brighness;
    		
    		float3 flare = s0.xxx;
 
@@ -137,7 +132,7 @@
    		flare +=  g0 * _SunGhosts4.w / len;
    		
 		// light rays
-		float2 uv2 = uv - 0.5.xx;
+		float2 uv2 = uv - sunPos;
 		float clen = length(uv2);
 		rotate(uv2, gang);
 		uv2.x *= aspectRatio;
@@ -154,14 +149,14 @@
 		float3 halo = pow(sin(float3(hlen, hlen + 0.1, hlen + 0.2)), 12.0.xxx);
 		halo *= _SunHalo.z / atten;
 		flare += halo;
-		
+
 		return flare * _SunTint;
    	}  
    	
    	 float3 sunflareFast(float2 uv) {
    	
 		// general params
-   		float2 sunPos = _SunPos.xy;
+		float2 sunPos = unity_StereoEyeIndex == 0 ? _SunPos.xy : _SunPosRightEye.xy;
    		
    		float2 grd = uv - sunPos;
    		float aspectRatio = _ScreenParams.y / _ScreenParams.x;
@@ -207,22 +202,26 @@
    	
   	float4 fragSF (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
    		return float4(sunflare(i.uvNonStereo), 1.0);
    	}  
 
   	float4 fragSFAdditive (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
   		float4 p = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
    		return p + float4(sunflare(i.uvNonStereo), 1.0);
    	}  
    	
   	float4 fragSFFast (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
    		return float4(sunflareFast(i.uvNonStereo), 1.0);
    	}  
 
   	float4 fragSFFastAdditive (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
   		float4 p = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
    		return p + float4(sunflareFast(i.uvNonStereo), 1.0);
    	} 

@@ -60,8 +60,8 @@
 		return o;
 	}	
 	
-	half getLuma(half3 rgb) {
-		const half3 lum = float3(0.299, 0.587, 0.114);
+	inline half getLuma(half3 rgb) {
+		const half3 lum = half3(0.299, 0.587, 0.114);
 		return dot(rgb, lum);
 	}
 	

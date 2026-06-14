@@ -1,9 +1,9 @@
-Shader "Beautify/BeautifyMobile" {
+Shader "Hidden/Kronnect/Beautify/BeautifyMobile" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_OverlayTex ("Overlay (RGB)", 2D) = "black" {}
-		_DoFTex("DoF (RGBA)", any) = "black" {}
-		//_DoFTex("DoF (RGBA)", 2D) = "black" {}
+		//_DoFTex("DoF (RGBA)", any) = "black" {}
+		_FXData("FX Additional Data", Vector) = (0.5, 0.5, 0)
 		_Sharpen ("Sharpen Data", Vector) = (2.5, 0.035, 0.5)
 		_ColorBoost ("Color Boost Data", Vector) = (1.1, 1.1, 0.08, 0)
 		_Dither ("Dither Data", Vector) = (5, 0, 0, 1.0)
@@ -14,26 +14,28 @@ Shader "Beautify/BeautifyMobile" {
 		_VignettingMask ("Mask Texture (A)", 2D) = "white" {}
 		_Frame("Frame Data", Vector) = (50,50,50,0)
 		_FrameMask ("Mask Texture (A)", 2D) = "white" {}
+        _FrameData("Frame Data 2", Vector) = (1,1,1,1)
 		_Outline("Outline", Color) = (0,0,0,0.8)
 		_Dirt("Dirt Data", Vector) = (0.5,0.5,0.5,0.5)
 		_Bloom("Bloom Data", Vector) = (0.5,0,0)
-		//_BloomTex("BloomTex (RGBA)", any) = "black" {}
-		_BloomTex("BloomTex (RGBA)", any) = "black" {}
+//		_BloomTex("BloomTex (RGBA)", any) = "black" {}
 		_BloomWeights("Bloom Weights", Vector) = (0.35,0.55,0.7,0.8)
 		_BloomWeights2("Bloom Weights 2", Vector) = (0.35,0.55,0.7,0.8)
-		//_ScreenLum("Luminance Tex (RGBA)", 2D) = "black" {}
-		_ScreenLum("Luminance Tex (RGBA)", any) = "black" {}
+		_BloomTint ("Bloom Tint", Color) = (1,1,1,0)
+//		_ScreenLum("Luminance Tex (RGBA)", any) = "black" {}
 		_CompareParams("Compare Params", Vector) = (0.785398175, 0.001, 0, 0)
 		_AFTint ("Anamorphic Flares Tint", Color) = (1,1,1,0.5)
 		_BokehData("Bokeh Data", Vector) = (10,1,0,1)		
 		_DepthTexture("Depth (RGBA)", 2D) = "black" {}
 		_DofExclusionTexture("DoF Exclusion (R)", 2D) = "white" {}
 		_BokehData2("Bokeh Data 2", Vector) = (1000.0, 4, 0, 0)
-		_BokehData3("Bokeh Data 3", Float) = 1000.0
+        _BokehData3("Bokeh Data 3", Vector) = (1000.0, 100000.0, 0)
 		_EyeAdaptation("Eye Adaptation Data", Vector) = (0.1, 2, 0.7, 1)
 		_Purkinje ("Purkinje Data", Vector) = (1.0, 0.15, 0)
-		_BloomDepthTreshold("Bloom Depth Threshold", Float) = 1.0
+		_BloomDepthThreshold("Bloom Depth Threshold", Float) = 0.0
+        _BloomNearThreshold("Bloom Near Threshold", Float) = 0.0
 		_SunPos("SunFlares Sun Screen Position", Vector) = (0.5, 0.5, 0, 0)
+        _SunPosRightEye("SF Screen Position Right Eye", Vector) = (0.5, 0.5, 0, 0)		
 		_SunData("SunFlares Sun Data", Vector) = (0.1, 0.05, 3.5, 0.13)
 		_SunCoronaRays1("SunFlares Corona Rays 1 Data", Vector) = (0.02, 12, 0.001, 0)
 		_SunCoronaRays2("SunFlares Corona Rays 2 Data", Vector) = (0.05, 12, 0.1, 0)
@@ -41,18 +43,22 @@ Shader "Beautify/BeautifyMobile" {
 		_SunGhosts2("SunFlares Ghosts 2 Data", Vector) = (0, 0.1, 0.2, 0.03)
 		_SunHalo("SunFlares Halo Data", Vector) = (0.22, 15.1415, 1.0)
 		_SunTint("Sun Flare Tint Color", Color) = (1,1,1)
-//		_CompareTex ("Compare Image (RGB)", 2D) = "black" {}
-		_CompareTex ("Compare Image (RGB)", any) = "black" {}
+//		_CompareTex ("Compare Image (RGB)", any) = "black" {}
 		_BlurScale ("Blur Scale", Float) = 1.0
 		_LUTTex ("Lut Texture (RGB)", 2D) = "white" {}
+        _LUT3DTex ("Lut 3D Texture (RGB)", 3D) = "" {}
+        _LUT3DParams("Lut 3D Params", Vector) = (1,1,0,0)
+        _HardLight("HardLight Data", Vector) = (0,0,0)
+        _ChromaticAberrationData("ChromaticAberrationData", Vector) = (0,0,0)
 	}
 
 Subshader {	
 
+  ZTest Always Cull Off ZWrite Off
+  Fog { Mode Off }
+
   Pass { // 0
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Compare Fast"
       CGPROGRAM
       #pragma vertex vertCompare
       #pragma fragment fragCompareFast
@@ -63,49 +69,44 @@ Subshader {
   }
  
   Pass { // 1
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Beautify Fast"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragBeautifyFast
       #pragma target 3.0
 	  #pragma fragmentoption ARB_precision_hint_fastest      
-#pragma multi_compile __ BEAUTIFY_DALTONIZE BEAUTIFY_LUT BEAUTIFY_NIGHT_VISION BEAUTIFY_THERMAL_VISION
-#pragma multi_compile __ BEAUTIFY_DEPTH_OF_FIELD BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
-#pragma multi_compile __ BEAUTIFY_OUTLINE
-#pragma multi_compile __ BEAUTIFY_DIRT
-#pragma multi_compile __ BEAUTIFY_BLOOM
-#pragma multi_compile __ BEAUTIFY_EYE_ADAPTATION
-#pragma multi_compile __ BEAUTIFY_PURKINJE
-// Edited by Shader Control: #pragma multi_compile __ BEAUTIFY_VIGNETTING BEAUTIFY_VIGNETTING_MASK
-#pragma multi_compile __ BEAUTIFY_VIGNETTING 
-// Edited by Shader Control: #pragma multi_compile __ BEAUTIFY_FRAME BEAUTIFY_FRAME_MASK
-#pragma multi_compile __ BEAUTIFY_FRAME 
-#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
+// Edited by Shader Control: #pragma multi_compile_local __ BEAUTIFY_DALTONIZE BEAUTIFY_LUT BEAUTIFY_LUT3D BEAUTIFY_NIGHT_VISION BEAUTIFY_THERMAL_VISION
+#pragma multi_compile_local __ BEAUTIFY_LUT3D 
+// Edited by Shader Control: #pragma multi_compile_local __ BEAUTIFY_DEPTH_OF_FIELD BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
+#pragma multi_compile_local __ BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_OUTLINE
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_DIRT
+#pragma multi_compile_local __ BEAUTIFY_BLOOM
+#pragma multi_compile_local __ BEAUTIFY_EYE_ADAPTATION
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_TONEMAP_ACES
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_PURKINJE
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_VIGNETTING BEAUTIFY_VIGNETTING_MASK
+// Disabled by Shader Control: #pragma multi_compile_local __ BEAUTIFY_FRAME BEAUTIFY_FRAME_MASK
+#pragma multi_compile_local __ BEAUTIFY_CHROMATIC_ABERRATION
       #include "BeautifyMobile.cginc"
       ENDCG
   }
 
   Pass { // 2
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Luminance"
       CGPROGRAM
       #pragma vertex vertLum
       #pragma fragment fragLum
       #pragma fragmentoption ARB_precision_hint_fastest
-#pragma multi_compile __ BEAUTIFY_BLOOM_USE_DEPTH
-#pragma multi_compile __ BEAUTIFY_BLOOM_USE_LAYER
-#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
+#pragma multi_compile_local __ BEAUTIFY_BLOOM_USE_DEPTH
+#pragma multi_compile_local __ BEAUTIFY_BLOOM_USE_LAYER
+#pragma multi_compile_local __ BEAUTIFY_BLOOM_PROP_THRESHOLDING
       #include "BeautifyLum.cginc"
       ENDCG
   }    
   
   Pass { // 3
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Debug Bloom"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragDebugBloom
@@ -116,9 +117,7 @@ Subshader {
       
   
   Pass { // 4
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Blur Horizontal"
       CGPROGRAM
       #pragma vertex vertBlurH
       #pragma fragment fragBlur
@@ -130,9 +129,7 @@ Subshader {
   
       
   Pass { // 5
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+      Name "Blur Vertical"
       CGPROGRAM
       #pragma vertex vertBlurV
       #pragma fragment fragBlur
@@ -143,39 +140,32 @@ Subshader {
   }    
   
 
-  Pass { // 6 DoF CoC
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-
+  Pass { // 6
+      Name "DoF CoC"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragCoC
 	  #pragma target 3.0
       #pragma fragmentoption ARB_precision_hint_fastest
-#pragma multi_compile __ BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
-#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
+#pragma multi_compile_local __ BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
       #include "BeautifyDoF.cginc"
       ENDCG
   } 
  
-  Pass { // 7 DoF CoC Debug
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-
+  Pass { // 7
+      Name "DoF CoC Debug"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragCoCDebug
       #pragma target 3.0
       #pragma fragmentoption ARB_precision_hint_fastest
-#pragma multi_compile __ BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
+#pragma multi_compile_local __ BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
       #include "BeautifyDoF.cginc"
       ENDCG
   } 
  
-  Pass { // 8 DoF Blur
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+  Pass { // 8
+      Name "DoF Blur"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragBlur
@@ -185,24 +175,19 @@ Subshader {
       ENDCG
   }    
   
- Pass { // 9 Compute Screen Lum
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+ Pass { // 9
+      Name "Compute Screen Lum"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragScreenLum
       #pragma fragmentoption ARB_precision_hint_fastest
       #pragma target 3.0
-#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
       #include "BeautifyEA.cginc"
       ENDCG
   }      
   
-  Pass { // 10 Reduce Screen Lum
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+  Pass { // 10
+      Name "Reduce Screen Lum"
       CGPROGRAM
       #pragma vertex vertCross
       #pragma fragment fragReduceScreenLum
@@ -212,11 +197,9 @@ Subshader {
       ENDCG
   }  
   
-  Pass { // 11 Blend Screen Lum
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
+  Pass { // 11
+      Name "Blend Screen Lum"
 	  Blend SrcAlpha OneMinusSrcAlpha
-	  
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragBlendScreenLum
@@ -227,11 +210,8 @@ Subshader {
   }    
 
     
-  Pass { // 12 Simple copy
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-//	  Blend SrcAlpha OneMinusSrcAlpha
-	  
+  Pass { // 12
+      Name "Simple copy"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragBlend
@@ -241,25 +221,22 @@ Subshader {
       ENDCG
   }  
           
-  Pass { // 13 Bloom premul compose
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
+  Pass { // 13
+      Name "Bloom premul compose"
 	  Blend One One
-	  
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragCopy
       #pragma fragmentoption ARB_precision_hint_fastest
       #pragma target 3.0
+      #define APPLY_TINT_COLOR
       #include "BeautifyLum.cginc"
       ENDCG
   } 
 
   Pass { // 14
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
+      Name "Anamorphic Resample Fast"
 	  Blend One One
-
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragResampleFastAF
@@ -269,10 +246,8 @@ Subshader {
       ENDCG
   } 
  
-  Pass { // 15 DoF Blur wo/Bokeh
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+  Pass { // 15
+      Name "DoF Blur wo/Bokeh"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragBlurNoBokeh
@@ -282,10 +257,8 @@ Subshader {
       ENDCG
   }    
   
-  Pass { // 16 Sun Flares
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+  Pass { // 16
+      Name "Sun Flares"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragSFFast
@@ -295,10 +268,8 @@ Subshader {
       ENDCG
   }
   
-    Pass { // 17 Sun Flares Additive
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+    Pass { // 17
+      Name "Sun Flares Additive"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragSFFastAdditive
@@ -308,10 +279,8 @@ Subshader {
       ENDCG
   }
   
-  Pass { // 18  Raw copy used in single blits with Single Pass Instanced
-	  ZTest Always Cull Off ZWrite Off
-	  Fog { Mode Off }
-	  
+  Pass { // 18
+      Name "Raw copy used in single blits with Single Pass Instanced"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment fragCopy
@@ -319,8 +288,31 @@ Subshader {
       #pragma target 3.0
       #include "BeautifyLum.cginc"
       ENDCG
+  }
+    
+  Pass { // 19
+      Name "Chromatic Aberration Custom Pass"
+      CGPROGRAM
+      #pragma vertex vertSimple
+      #pragma fragment fragChromaticAberrationFast
+      #pragma fragmentoption ARB_precision_hint_fastest
+      #pragma target 3.0
+      #define BEAUTIFY_CHROMATIC_ABERRATION 1
+      #include "BeautifyCAberration.cginc"
+      ENDCG
   }  
   
+  Pass { // 20
+      Name "Resample"
+      CGPROGRAM
+      #pragma vertex vertCross
+      #pragma fragment fragResample
+      #pragma fragmentoption ARB_precision_hint_fastest
+      #pragma target 3.0
+      #include "BeautifyLum.cginc"
+      ENDCG
+  }
+   
 }
 FallBack Off
 }

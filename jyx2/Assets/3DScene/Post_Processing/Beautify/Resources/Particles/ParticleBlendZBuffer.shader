@@ -7,9 +7,8 @@ Properties {
 }
 
 Category {
-    Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Opaque" "PreviewType"="Plane" }
+    Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "PreviewType"="Plane" }
     Blend SrcAlpha OneMinusSrcAlpha
-//    ColorMask RGB
     Cull Off Lighting Off
     ZWrite On
     ZTest Always

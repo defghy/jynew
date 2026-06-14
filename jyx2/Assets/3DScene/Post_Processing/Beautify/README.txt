@@ -18,17 +18,19 @@ Hint: to use the asset, select your camera and add "Beautify" script to it.
 
 Documentation/API reference
 ---------------------------
-The PDF is located in the Documentation folder. It contains additional instructions and description about the asset, as well as some recommendations.
+Please check the Documentation folder. It contains additional instructions and description about the asset, as well as some recommendations.
 
 
 
 Support
 -------
-Please read the documentation PDF and browse/play with the demo scene and sample source code included before contacting us for support :-)
+Please read the documentation and browse/play with the demo scene and sample source code included before contacting us for support :-)
 
-* Support: contact@kronnect.me
-* Website-Forum: http://kronnect.me
-* Twitter: @KronnectGames
+Have any question or issue?
+* Support-Web: https://kronnect.com/support
+* Support-Discord: https://discord.gg/EH2GMaM
+* Email: contact@kronnect.com
+* Twitter: @Kronnect
 
 
 
@@ -44,6 +46,166 @@ Of course, all updates of Beautify will be eventually available on the Asset Sto
 
 Version history
 ---------------
+
+Current version
+- Bloom: improved stability in Best Performance mode
+- Bloom: Ultra option is now available in Best Performance mode
+- Faster dither when depth based effects option is disabled
+- Downscale/supersampling is now a fractional value
+- [Fix] Fixed downscale/supersampling on Android in Unity 2022.3
+
+Version 10.6
+- Anamorphic flares: prevents using too large render textures in very high resolutions
+
+Version 10.5
+- Added new Compare Mode option (vertical line)
+
+Version 10.4.2
+- [Fix] Fixed super-sampling and pixelate with downscale in Unity 2022
+
+Version 10.4.1
+- [Fix] Fixed "Customize Bloom" issue
+
+Version 10.4
+- Added "Conservative" threshold option to bloom and anamorphic flares
+- [Fix] Fix to a bug in Unity 2022.2 related to blit material
+- [Fix] Fixed an issue with layer mask 31 in culling mask options
+
+Version 10.3
+- [Fix] Fixed image aspect ratio when using supersampling and custom viewport size
+
+Version 10.2
+- Added "Automatic" command in Shader Options. This is a convenient way to quickly toggle shader features based on current used Beautify options.
+- Optimization: removed one full screen blit when using super-sampling or pixelate/downscale.
+- Antialias: added "Max Spread" option.
+
+Version 10.1
+- Added "Motion Restore Speed". Improved accuracy of motion sensibility.
+- Antialias: added "Depth Attenuation". Reduces antialias effect on distance
+
+Version 9.1
+- Frame: added cinematic bands option
+- Bloom: uncapped "Depth Attenuation" limit
+
+Version 9.0
+- Option to use ACES tonemapping in Best Performance mode
+
+Version 8.8.1
+- LUT Browser fixes
+- Improved compatibility with Unity 2021.3
+
+Version 8.8
+- Added new compare mode options
+- Added 3D LUT Cube format support
+
+Version 8.7
+- Minimum Unity version required is now 2019.4.13
+- Depth of field: added real camera settings
+- Removed global shader keywords
+
+Version 8.6
+- Added a new advanced parameter "Kill NAN" to remove invalid pixels from the input image
+- [Fix] Fixed scene being marked as unsaved when depth of field distance debug value was updated
+- [Fix] VR: fixed bloom layer mask issue with Single Pass Instanced
+
+Version 8.5
+- Added the ability to use different layer masks for bloom and anamorphic flares
+
+Version 8.4
+- Added Frame Pack browser
+
+Version 8.3.1
+- Reduced number of shader variants
+- Improved LUT browser UI
+- [Fix] Fixed depth of field bokeh threshold in gamma color space
+
+Version 8.3
+- Added "Composition" option to depth of field in high quality mode
+
+Version 8.2
+- Added LUT Browser (access it from inspector or from Window -> LUT Browser)
+- Added "Pure LUT" button to inspector which resets all other color grading options
+
+Version 8.1.1
+- Added Chromatic Aberration effect
+- Beautify can now be compiled without any reference to VR/XR modules (check documentation)
+- [Fix] Depth threshold was visible when advanced option "Depth-based effect" was disabled
+
+Version 8.0
+- Added new options for outline effect
+- Spotlight can be assigned to Sun flare
+- DoF: added blur spread option when foreground HQ blur is enabled
+
+Versino 7.9.1 21/Dec/2021
+- Added "Sun Flares Reveal Speed" / "Sun Flares Hide Speed" (works only if depth checking option is not used)
+- Shader material handling optimizations
+
+Version 7.9
+- Added "Vignetting Center" parameter
+- Added "Blink Style" (cutscene or human style)
+- Added "Bloom Near Attenuation Distance" parameter
+- Minor change to support shader options updates when only the mobile-version shader is kept
+
+Version 7.8
+- Added "Hard Light" effect (enable it in Shader Options)
+- New option "Depth Based Effects" in Shader Options. Disable to improve performance on mobile.
+
+Version 7.7
+- Support for LUTs of different resolutions than standard 1024x32
+- Added Eye Adaptation option: "Show In Editor"
+
+Version 7.6
+- Added bloom color tint option
+- Added option to detect Sun occlusion using sky color chroma
+- [Fix] Fixed issue with the anamorphic flares resolution slider
+
+Version 7.5
+- Added Super Sampling option in Best Quality mode
+- [Fix] Fixed dof autofocus distance to reflect exact distance between camera and focus target
+
+Version 7.3.1
+- [Fix] Fixed Sun flares rendering issue with Single Pass Stereo on Oculus Quest
+
+Version 7.3
+- Added "Quality" slider when Ultra setting is enabled
+- Added "Camera Event" option under Bloom/DoF Layer Mask
+
+Version 7.2
+- Added "Sync with Profile": when disabled, you can change inspector settings and keep those modifications regardless of active profile (click 'Load' to reload profile settings). When enabled (default), profile settings will replace inspector settings when entering playmode.
+- [Fix] Fixed issue in VR when bloom layer mask is enabled in Oculus Go
+
+Version 7.1.1
+- Added Downscale option on top of inspector when in Best Performance mode (previously this option could be found under pixelate effect)
+
+Version 7.1
+- Bloom: added "Quicker Blur" to bloom effect in High Quality mode
+- Sharpen: added Depth FallOff to smooth effect around min/max depth limits
+- Added "Depth Based Sharpen" option in Shader Options menu. Disable if don't need min/max depth control to improve performance a bit.
+- Improved Depth of Field effect: reduced "popping" effect when changing focus distance
+
+Version 7.0.2
+- [Fix] Fixed issue with changing bloom culling mask not refreshing immediately
+- [Fix] Fixed issee when enabling Sun depth-based occlusion option 
+- [Fix] Fixed Sun flares issue with Single Pass Stereo (Unity 2018+)
+
+Version 7.0.1
+- Added LUT import settings check to Inspector. Shows a warning and button to auto-fix if necessary
+- Bloom layer mask is now ignored if it's set to Everything (equals to not using layer mask)
+- [Fix] Fixed LUT issue in linear color space
+
+Version 7.0
+- DoF: added depth of field transparency layer mask option
+- DoF: added OnBeforeFocus event to allow user defined focus distance calculation
+- DoF: added Max Distance parameter
+- DoF: added Viewport point parameter for autofocus mode
+- DoF: current focal point distance is now visible in the inspector
+- Exposure now accepts values greater than 2 in HDR mode
+- Core Effects option in Shader Options now split between Sharpen and Color Tweaks
+- Added basic AntiAlias option in Best Quality mode
+- New anti-alias depth threshold option
+- [Fix] Fixed issue with camera viewport and bloom/dof exclusion masks
+- [Fix] Workaround for depth bug with Oculus GO and stereo rendering
+- [Fix] Fixed pixelate error in Unity 2017.2+ with Best Performance mode
 
 Version 6.2
 - Depth of Field: added High Quality option to Foreground blur

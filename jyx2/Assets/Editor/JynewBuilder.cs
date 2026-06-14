@@ -58,7 +58,6 @@ namespace Editor
 
                 //生成xlua
                 Generator.GenAll();
-                EditorUtility.RequestScriptReload();
 
                 //在临时目录生成ab包
                 GenerateAssetBundlesInTempDirectory(target);

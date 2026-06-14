@@ -1,9 +1,9 @@
-Shader "Beautify/BeautifyBasic" {
+Shader "Hidden/Kronnect/Beautify/BeautifyBasic" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_Sharpen ("Sharpen Data", Vector) = (2.5, 0.035, 0.5)
 		_ColorBoost ("Color Boost Data", Vector) = (1.1, 1.1, 0.08, 0)
-		_CompareTex ("Compare Image (RGB)", 2D) = "black" {}
+//		_CompareTex ("Compare Image (RGB)", 2D) = "black" {}
 	}
 
 Subshader {	
@@ -28,7 +28,6 @@ Subshader {
       #pragma vertex vert
       #pragma fragment fragBeautifyFast
 	  #pragma fragmentoption ARB_precision_hint_fastest      
-	  #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
       #include "BeautifyBasic.cginc"
       ENDCG
   }

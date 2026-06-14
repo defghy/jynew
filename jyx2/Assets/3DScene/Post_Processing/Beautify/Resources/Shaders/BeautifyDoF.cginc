@@ -1,4 +1,4 @@
-	// Copyright 2016-2018 Kronnect - All Rights Reserved.
+﻿	// Copyright 2016-2019 Kronnect - All Rights Reserved.
 	
 	#include "UnityCG.cginc"
 	#include "BeautifyAdvancedParams.cginc"
@@ -12,7 +12,7 @@
 	uniform float4    _MainTex_ST;
 	uniform float4	  _BokehData;
 	uniform float4    _BokehData2;
-	uniform float     _BokehData3;
+	uniform float3    _BokehData3;
     uniform float     _BlurScale;
 	
     struct appdata {
@@ -67,29 +67,32 @@
 	#if BEAUTIFY_DEPTH_OF_FIELD_TRANSPARENT
 	    float depthTex = DecodeFloatRGBA(tex2Dlod(_DepthTexture, float4(i.uvNonStereo, 0, 0)));
 	    float exclusionDepth = DecodeFloatRGBA(tex2Dlod(_DofExclusionTexture, float4(i.uvNonStereo, 0, 0)));
-		float depth  = Linear01Depth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.depthUV)));
+        float depth  = Linear01Depth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.depthUV));
 		depth = min(depth, depthTex);
 		if (exclusionDepth < depth) return 0;
 	    depth *= _ProjectionParams.z;
 	#else
-		float depth  = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.depthUV)));
+        float depth  = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.depthUV));
 	#endif
+        if (depth>_BokehData3.y) return 0;
 		float xd     = abs(depth - _BokehData.x) - _BokehData2.x * (depth < _BokehData.x);
 		return 0.5 * _BokehData.y * xd/depth;	// radius of CoC
 	}
 				
 	float4 fragCoC (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 		float4 pixel  = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
 		pixel         = clamp(pixel, 0.0.xxxx, _BokehData3.xxxx);
 		#if UNITY_COLORSPACE_GAMMA
-		pixel.rgb     = GammaToLinearSpace(pixel.rgb);
+			pixel.rgb     = GammaToLinearSpace(pixel.rgb);
 		#endif
    		return float4(pixel.rgb, getCoc(i));
    	}	
 	
 	float4 fragCoCDebug (v2f i) : SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 		float4 pixel  = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
 		pixel         = clamp(pixel, 0.0.xxxx, _BokehData3.xxxx);
 		float  CoC    = getCoc(i);
@@ -99,6 +102,8 @@
 
 	float4 fragBlur (v2f i): SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+        
 		float4 sum     = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv );
 		float  samples = ceil(sum.a);
 		float4 dir     = float4(_BokehData.zw * _MainTex_TexelSize.xy, 0, 0);
@@ -122,7 +127,7 @@
 				#else
 				float4 pixel1	   = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp1);
 				#endif
-				float  bt1         = pixel1.a > k;
+				float  bt1         = saturate(pixel1.a - k);
 				       pixel1.rgb += _BokehData2.www * max(pixel1.rgb - _BokehData2.zzz, 0.0.xxx);
 					   sum        += pixel1 * bt1;
 					   w 	      += bt1;
@@ -133,7 +138,7 @@
 				#else
 				float4 pixel2	   = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp2);
 				#endif
-					   float  bt2  = pixel2.a > k;
+					   float  bt2  = saturate(pixel2.a - k);
 				       pixel2.rgb += _BokehData2.www * max(pixel2.rgb - _BokehData2.zzz, 0.0.xxx);
 					   sum        += pixel2 * bt2;
 					   w          += bt2;
@@ -145,6 +150,8 @@
 
 	float4 fragBlurNoBokeh (v2f i): SV_Target {
 		UNITY_SETUP_INSTANCE_ID(i);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+        
 		float4 sum     = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv );
 		float samples  = ceil(sum.a);
 		float4 dir     = float4(_BokehData.zw * _MainTex_TexelSize.xy, 0, 0);
@@ -167,7 +174,7 @@
 				#else
 				float4 pixel1      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp1);
 				#endif
-				float  bt1         = pixel1.a > k;
+				float  bt1         = saturate(pixel1.a - k);
 					   sum        += bt1 * pixel1;
 					   w 	      += bt1;
 					   disp1      += dir;
@@ -176,7 +183,7 @@
 				#else
 				float4 pixel2      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp2);
 				#endif
-				float  bt2         = pixel2.a > k;
+			    float  bt2  	   = saturate(pixel2.a - k);
 					   sum        += bt2 * pixel2;
 					   w          += bt2;
 					   disp2      -= dir;
@@ -199,7 +206,7 @@
             o.uv.y = 1.0 - o.uv.y;
         }
         #endif      
-        half2 inc = half2(_MainTex_TexelSize.x * 1.3846153846 * _BlurScale, 0); 
+        float2 inc = float2(_MainTex_TexelSize.x * 1.3846153846 * _BlurScale, 0); 
 
 #if UNITY_SINGLE_PASS_STEREO
         inc.x *= 2.0;
@@ -207,7 +214,7 @@
         o.uv1 = UnityStereoScreenSpaceUVAdjust(v.texcoord - inc, _MainTex_ST);  
         o.uv2 = UnityStereoScreenSpaceUVAdjust(v.texcoord + inc, _MainTex_ST);  
 
-        half2 inc2 = half2(_MainTex_TexelSize.x * 3.2307692308 * _BlurScale, 0);    
+        float2 inc2 = float2(_MainTex_TexelSize.x * 3.2307692308 * _BlurScale, 0);    
 
 #if UNITY_SINGLE_PASS_STEREO
         inc2.x *= 2.0;
@@ -230,11 +237,11 @@
             o.uv.y = 1.0 - o.uv.y;
         }
         #endif      
-        half2 inc = half2(0, _MainTex_TexelSize.y * 1.3846153846 * _BlurScale); 
+        float2 inc = float2(0, _MainTex_TexelSize.y * 1.3846153846 * _BlurScale); 
         o.uv1 = UnityStereoScreenSpaceUVAdjust(v.texcoord - inc, _MainTex_ST);  
         o.uv2 = UnityStereoScreenSpaceUVAdjust(v.texcoord + inc, _MainTex_ST);  
 
-        half2 inc2 = half2(0, _MainTex_TexelSize.y * 3.2307692308 * _BlurScale);    
+        float2 inc2 = float2(0, _MainTex_TexelSize.y * 3.2307692308 * _BlurScale);    
         o.uv3 = UnityStereoScreenSpaceUVAdjust(v.texcoord - inc2, _MainTex_ST);
         o.uv4 = UnityStereoScreenSpaceUVAdjust(v.texcoord + inc2, _MainTex_ST); 
         return o;
@@ -243,11 +250,12 @@
 
    float4 fragBlurCoC (v2fCross i): SV_Target {
         UNITY_SETUP_INSTANCE_ID(i);
-        float depth   = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.uv)));
-        float depth1  = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.uv1)));
-        float depth2  = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.uv2)));
-        float depth3  = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.uv3)));
-        float depth4  = LinearEyeDepth(UNITY_SAMPLE_DEPTH(UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, i.uv4)));
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+        float depth   = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.uv));
+        float depth1  = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.uv1));
+        float depth2  = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.uv2));
+        float depth3  = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.uv3));
+        float depth4  = LinearEyeDepth(BEAUTIFY_DEPTH(_CameraDepthTexture, i.uv4));
 
         const float f = 10;
         float w1      = saturate((depth - depth1)/f) * 0.3162162162; 
@@ -262,12 +270,73 @@
 
         float w0      = 0.2270270270;
 
-        half4 pixel = tex2D(_MainTex, i.uv);
+        half4 pixel = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv);
 
         float coc     = (pixel.a * w0 + coc1 * w1 + coc2 * w2 + coc3 * w3 + coc4 * w4) / (w0 + w1 + w2 + w3 + w4);
         pixel.a = coc;
         return pixel;
     }   
+
+               
+    float4 FragThreshold (v2f input) : SV_Target {
+        UNITY_SETUP_INSTANCE_ID(input);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+        float2 uv = input.uv;
+        float4 pixel  = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, uv);
+        pixel         = clamp(pixel, 0.0.xxxx, _BokehData3.xxxx);
+		#if UNITY_COLORSPACE_GAMMA
+			pixel.rgb     = GammaToLinearSpace(pixel.rgb);
+		#endif
+        pixel.rgb     = _BokehData2.www * max(pixel.rgb - _BokehData2.zzz, 0.0.xxx);
+        float coc = getCoc(input);
+        return float4(pixel.rgb, coc);
+    }    
+
+    float4 FragCopyBokeh(v2f input) : SV_Target {
+        UNITY_SETUP_INSTANCE_ID(input);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+        float4 bokeh = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, input.uv);
+        return bokeh;
+    }
+
+    float4 FragBlurSeparateBokeh (v2f input): SV_Target {
+        UNITY_SETUP_INSTANCE_ID(input);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+        float2 uv = input.uv;
+        float4 sum     = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, uv);
+        float samples  = ceil(sum.a);
+        float4 dir     = float4(_BokehData.zw * _MainTex_TexelSize.xy, 0, 0);
+               dir    *= max(1.0, samples / _BokehData2.y);
+        float  jitter  = dot(float2(2.4084507, 3.2535211), uv * _MainTex_TexelSize.zw);
+        float2 disp0   = dir.xy * (frac(jitter) + 0.5);
+        float4 disp1   = float4(input.uv + disp0, 0, 0);
+        float4 disp2   = float4(input.uv - disp0, 0, 0);
+
+        const int sampleCount = (int)min(_BokehData2.y, samples);
+        UNITY_UNROLL
+        for (int k=1;k<16;k++) {
+            if (k<sampleCount) {
+				#if UNITY_SINGLE_PASS_STEREO
+				float4 pixel1      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, float4(UnityStereoScreenSpaceUVAdjust(disp1.xy, _MainTex_ST), 0, 0));
+				#else
+				float4 pixel1      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp1);
+				#endif
+                float  bt1         = saturate(pixel1.a - k);                
+                       sum        = max(sum, bt1 * pixel1);
+                       disp1      += dir;
+				#if UNITY_SINGLE_PASS_STEREO
+				float4 pixel2      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, float4(UnityStereoScreenSpaceUVAdjust(disp2.xy, _MainTex_ST), 0, 0));
+				#else
+				float4 pixel2      = SAMPLE_RAW_DEPTH_TEXTURE_LOD(_MainTex, disp2);
+				#endif
+                float  bt2  = saturate(pixel2.a - k);   
+                       sum        = max(sum, bt2 * pixel2);
+                       disp2      -= dir;
+            }
+        }
+        return sum;
+    }
+
 
 
 

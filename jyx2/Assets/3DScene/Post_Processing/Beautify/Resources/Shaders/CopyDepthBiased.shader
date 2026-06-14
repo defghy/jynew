@@ -1,4 +1,4 @@
-Shader "Beautify/CopyDepthBiased" {
+Shader "Hidden/Kronnect/Beautify/CopyDepthBiased" {
 	Properties{
 		_MainTex("", 2D) = "white" {}
 	}

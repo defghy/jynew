@@ -1,16 +1,16 @@
 fileFormatVersion: 2
 guid: 54415757aaddf4b8a9cd7122fd120cc6
 labels:
+- Bloom
+- Cinematic
+- Color
+- Colorblind
 - Effect
+- Post
 - Shader
 - Sharpen
-- Cinematic
-- Colorblind
-- Color
-- Bloom
-timeCreated: 1462519607
-licenseType: Store
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
   defaultReferences: []
   executionOrder: 0
