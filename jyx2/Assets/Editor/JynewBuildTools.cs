@@ -10,7 +10,7 @@ using Cysharp.Threading.Tasks;
 using Jyx2.MOD.ModV2;
 using TMPro.EditorUtilities;
 #if UNITY_STANDALONE_OSX
-using UnityEditor.OSXStandalone;
+using UnityEditor.Build;
 #endif
 using UnityEditor.SceneManagement;
 using XNode;
@@ -207,7 +207,7 @@ namespace Editor
         {
 #if UNITY_STANDALONE_OSX
             //支持m1芯片
-            UnityEditor.OSXStandalone.UserBuildSettings.architecture = MacOSArchitecture.x64ARM64;
+            UnityEditor.OSXStandalone.UserBuildSettings.architecture = OSArchitecture.x64ARM64;
 #endif
             string currentDate = DateTime.Now.ToString("yyyyMMdd");
             string outputName = $"jyxOSXBuild-{currentDate}.app";
@@ -219,7 +219,7 @@ namespace Editor
         {
 #if UNITY_STANDALONE_OSX
             //支持m1芯片
-            UnityEditor.OSXStandalone.UserBuildSettings.architecture = MacOSArchitecture.x64ARM64;
+            UnityEditor.OSXStandalone.UserBuildSettings.architecture = OSArchitecture.x64ARM64;
 #endif
             string currentDate = DateTime.Now.ToString("yyyyMMdd");
             string outputName = $"jyxOSXBuild-{currentDate}.app";
