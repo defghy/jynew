@@ -38,9 +38,9 @@
         "**/*.cubemap": true,
         "**/*.flare": true,
         "**/*.mat": true,
-        // "**/*.meta": true,
-        // "**/*.prefab": true,
-        // "**/*.unity": true,
+        "**/*.unity": true,
+        "**/*.meta": true,
+        "**/*.csproj": true,
         "build/": true,
         "Build/": true,
         "Library/": true,
@@ -49,8 +49,7 @@
         "Obj/": true,
         "ProjectSettings/": true,
         "temp/": true,
-        "Temp/": true,
-        "**/*.csproj": true,
+        "Temp/": true
     },
     "dotnet.defaultSolution": "jyx2.sln"
 }
