@@ -40,7 +40,6 @@
         "**/*.mat": true,
         "**/*.unity": true,
         "**/*.meta": true,
-        "**/*.csproj": true,
         "build/": true,
         "Build/": true,
         "Library/": true,

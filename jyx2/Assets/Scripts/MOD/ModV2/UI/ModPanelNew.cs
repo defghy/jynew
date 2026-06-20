@@ -254,13 +254,22 @@ namespace MOD.UI
         void OnDonate()
         {
 #if UNITY_STANDALONE
-            if (Steamworks.SteamUtils.IsOverlayEnabled)
+            const string donateUrl = "https://store.steampowered.com/app/2298200/_/?curator_clanid=42936139";
+            try
             {
-                Steamworks.SteamFriends.OpenStoreOverlay(2298200); //捐款DLC
+                if (Steamworks.SteamClient.IsValid && Steamworks.SteamUtils.IsOverlayEnabled)
+                {
+                    Steamworks.SteamFriends.OpenStoreOverlay(2298200); //捐款DLC
+                }
+                else
+                {
+                    Jyx2.Middleware.Tools.openURL(donateUrl);
+                }
             }
-            else
+            catch (Exception e)
             {
-                Jyx2.Middleware.Tools.openURL("https://store.steampowered.com/app/2298200/_/?curator_clanid=42936139");    
+                Debug.LogWarning($"打开Steam捐助页面失败，改用浏览器打开: {e.Message}");
+                Jyx2.Middleware.Tools.openURL(donateUrl);    
             }
 #else
             Jyx2.Middleware.Tools.openURL("https://github.com/jynew/jynew/wiki/%E6%8D%90%E5%8A%A9%E9%A1%B9%E7%9B%AE");           

@@ -15,7 +15,7 @@
 当前 Unity 版本：
 
 ```text
-2022.3.18f1
+2022.3.62f3c1
 ```
 
 对应文件：
@@ -364,10 +364,10 @@ jyx2/
 Unity 版本使用：
 
 ```text
-2022.3.18f1
+2022.3.62f3c1
 ```
 
-第一次导入可能较慢。等 Package、脚本编译、资源导入完成后再操作。
+第一次导入可能较慢。等 Package、脚本编译、资源导入完成后再操作。Package 依赖里有 Gitee Git URL，网络不稳定时 Package Manager 可能会卡住；这种情况先看 Unity Console 和 Package Manager 报错，而不是急着改代码。
 
 ### 第 2 步：从启动场景运行
 
@@ -412,6 +412,7 @@ Assets/Prefabs/Jyx2UI/GameMainMenu.prefab
 - prefab 里的按钮路径是什么。
 - UIData 如何把按钮变成 C# 字段。
 - GameMainMenu 如何绑定点击事件。
+- `OnShowPanel()` 什么时候触发，以及它如何调用 `RuntimeEnvSetup.Setup()` 初始化当前 MOD。
 
 ### 第 4 步：追一次新游戏点击
 
@@ -478,13 +479,13 @@ Assets/Mods/SAMPLE/Configs/Lua/
 Assets/Scripts/UI/GameMainMenu.cs
 ```
 
-在 `OnNewGameClicked()` 加日志：
+在 `OnNewGameClicked()` 加日志或断点：
 
 ```csharp
 Debug.Log("Click New Game");
 ```
 
-运行后点击“新游戏”，在 Console 确认日志出现。
+运行后点击“新游戏”，在 Console 确认日志出现。若想用 IDE 断点，建议安装 Unity 对应 IDE 插件，并从 IDE 附加到 Unity Editor 进程。
 
 进一步可以在 `OnNewGame()`、`OnCreateBtnClicked()`、`OnCreateRoleYesClick()` 各加一个日志，串起完整链路。
 
@@ -493,7 +494,7 @@ Debug.Log("Click New Game");
 当前 `SetPlayerName(string newName)` 遇到空名字会直接 return。可以改成弹提示：
 
 ```csharp
-if (string.IsNullOrWhiteSpace(newName) || string.IsNullOrEmpty(newName))
+if (string.IsNullOrWhiteSpace(newName))
 {
     StoryEngine.DisplayPopInfo("请输入名字");
     return;
@@ -543,7 +544,7 @@ Assets/Scripts/UI/ChatUIPanel.cs
 
 症状：Package 报错、资源大量重导、场景或 prefab 序列化异常。
 
-处理：使用 `2022.3.18f1`。
+处理：使用 `2022.3.62f3c1`，以 `jyx2/ProjectSettings/ProjectVersion.txt` 为准。
 
 ### 打开了错误目录
 
